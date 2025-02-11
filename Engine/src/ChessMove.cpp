@@ -1,0 +1,59 @@
+#include "ChessMove.hpp"
+
+
+ChessMove::ChessMove() : from({0, 0}), to({0, 0}), promotion(0) {}
+
+ChessMove::ChessMove(const ChessMove& other) : from(other.from), to(other.to), promotion(other.promotion) {}
+
+ChessMove::ChessMove(int fromRow, int fromCol, int toRow, int toCol, int promotion) : from({fromRow, fromCol}), to({toRow, toCol}), promotion(promotion) {}
+
+ChessMove& ChessMove::operator=(const ChessMove& other)
+{
+    from = other.from;
+    to = other.to;
+    promotion = other.promotion;
+    return *this;
+}
+
+ChessMove::~ChessMove() {}
+
+std::pair<int, int> ChessMove::getFrom() const
+{
+    return from;
+}
+
+std::pair<int, int> ChessMove::getTo() const
+{
+    return to;
+}
+
+int ChessMove::getPromotion() const
+{
+    return promotion;
+}
+
+void ChessMove::setFrom(int from)
+{
+    this->from = {from / 8, from % 8};
+}
+
+void ChessMove::setTo(int to)
+{
+    this->to = {to / 8, to % 8};
+}
+
+
+void ChessMove::setPromotion(int promotion)
+{
+    this->promotion = promotion;
+}
+
+bool ChessMove::operator==(const ChessMove& other) const
+{
+    return from == other.from && to == other.to && promotion == other.promotion;
+}
+
+bool ChessMove::operator!=(const ChessMove& other) const
+{
+    return !(*this == other);
+}

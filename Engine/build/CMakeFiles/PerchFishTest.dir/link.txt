@@ -1,0 +1,1 @@
+/Library/Developer/CommandLineTools/usr/bin/c++  -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX13.3.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/PerchFishTest.dir/tests/ChessMoveTest.cpp.o CMakeFiles/PerchFishTest.dir/tests/ChessStateTest.cpp.o -o PerchFishTest  libPerchFish.a lib/libgtest.a lib/libgtest_main.a lib/libgtest.a 
