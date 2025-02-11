@@ -1,2 +1,0 @@
-/Library/Developer/CommandLineTools/usr/bin/ar qc libPerchFish.a CMakeFiles/PerchFish.dir/src/ChessMove.cpp.o CMakeFiles/PerchFish.dir/src/ChessState.cpp.o
-/Library/Developer/CommandLineTools/usr/bin/ranlib libPerchFish.a
