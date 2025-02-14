@@ -14,6 +14,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: List repository structure
+        run: ls -la
+
       - name: Install Dependencies
         run: |
           sudo apt-get update
@@ -23,7 +26,8 @@ jobs:
         run: |
           mkdir -p build
           cd build
-          cmake -DCMAKE_BUILD_TYPE=Release ..
+          # Adjust the source directory if your CMakeLists.txt is not in the repository root.
+          cmake -DCMAKE_BUILD_TYPE=Release ../Engine
 
       - name: Build project
         run: |
@@ -34,3 +38,4 @@ jobs:
         run: |
           cd build
           ctest --output-on-failure
+
