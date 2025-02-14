@@ -30,7 +30,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(sqlite3)
 
-
+# Add the source files
 set(SRC 
 src/ChessMove.cpp
 src/ChessState.cpp
@@ -39,23 +39,27 @@ src/PositionORM.cpp
 src/ChessServer.cpp
 )
 
+# Add the test source files
 set(TEST_SRC
 tests/ChessMoveTest.cpp
 tests/ChessStateTest.cpp
 )
 
+# Add the library
 add_library(PerchFish ${SRC})
 
+# Add the executable
 add_executable(PerchFishTest ${TEST_SRC})
-
 add_executable(PerchFishMain src/main.cpp ${SRC})
 
+# Add include directories
 target_include_directories(PerchFishMain PUBLIC ${sqlite3_SOURCE_DIR}/include ${httplib_SOURCE_DIR})
-
-target_link_libraries(PerchFishMain PerchFish httplib::httplib sqlite3)
-
 target_include_directories(PerchFish PUBLIC include ${sqlite3_SOURCE_DIR}/include ${httplib_SOURCE_DIR})
 
+# Link the libraries
+target_link_libraries(PerchFishMain PerchFish httplib::httplib sqlite3)
 target_link_libraries(PerchFishTest PerchFish gtest gtest_main sqlite3)
 
+# Enable testing
 enable_testing()
+add_test(NAME PerchFishTest COMMAND PerchFishTest)
