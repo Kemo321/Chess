@@ -35,7 +35,7 @@ std::string Engine::getBestMove(const std::string& stateStr, int depth)
     if (computedMove.empty())
     {
         std::cerr << "Error: Computed best move is empty." << std::endl;
-        return ""; // Or handle this error case as needed.
+        return ""; 
     }
     
     // Insert the newly computed best move into the database.
