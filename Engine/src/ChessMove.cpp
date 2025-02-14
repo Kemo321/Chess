@@ -64,5 +64,6 @@ void ChessMove::printMove() const
 
 std::string ChessMove::toString() const
 {
-    return std::to_string(from.first) + std::to_string(from.second) + std::to_string(to.first) + std::to_string(to.second);
+    return std::to_string(from.first) + std::to_string(from.second) + std::to_string(to.first) + std::to_string(to.second)
+    + std::to_string(promotion);
 }

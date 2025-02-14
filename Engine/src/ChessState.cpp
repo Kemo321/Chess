@@ -431,7 +431,11 @@ void ChessState::printBoard() const
         {
             if (state[i][j] >= 'a' && state[i][j] <= 'z') 
             {
-                std::cout << "\033[1;30m" << state[i][j] << " \033[0m"; // Print black pieces in black color
+                std::cout << "\033[1;31m" << state[i][j] << " \033[0m"; // Print black pieces in red color
+            } 
+            else if (state[i][j] >= 'A' && state[i][j] <= 'Z') 
+            {
+                std::cout << "\033[1;33m" << state[i][j] << " \033[0m"; // Print white pieces in yellow color
             } 
             else 
             {
@@ -453,8 +457,20 @@ void ChessState::getPawnMoves(int row, int col, std::vector<ChessMove>& legalMov
     // Move forward
     if (isInsideBoard(row + (whiteToMove ? -1 : 1), col) && state[row + (whiteToMove ? -1 : 1)][col] == '0') 
     {
-        if (isLegalMove(ChessMove(row, col, row + (whiteToMove ? -1 : 1), col, 0)))
-            legalMoves.push_back(ChessMove(row, col, row + (whiteToMove ? -1 : 1), col, 0));
+        // Promotion
+        if(isLegalMove(ChessMove(row, col, row + (whiteToMove ? -1 : 1), col, 0)) && (row + (whiteToMove ? -1 : 1) == 0 || row + (whiteToMove ? -1 : 1) == 7))
+        {
+            for (int i = 0; i < 4; i++) // 0: Queen, 1: Rook, 2: Knight, 3: Bishop
+            {
+                if(isLegalMove(ChessMove(row, col, row + (whiteToMove ? -1 : 1), col, i)))
+                    legalMoves.push_back(ChessMove(row, col, row + (whiteToMove ? -1 : 1), col, i));
+            }
+        }
+        else
+        {
+            if (isLegalMove(ChessMove(row, col, row + (whiteToMove ? -1 : 1), col, 0)))
+                legalMoves.push_back(ChessMove(row, col, row + (whiteToMove ? -1 : 1), col, 0));
+        }
     }
 
 

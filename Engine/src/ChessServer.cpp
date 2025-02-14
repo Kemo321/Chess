@@ -21,7 +21,7 @@ ChessServer::ChessServer()
         }
 
         try {
-            std::string bestMove = engine.getBestMove(req.body, 4); // Compute before responding
+            std::string bestMove = engine.getBestMove(req.body, 5); // Compute before responding
             std::cout << "Best move: " << bestMove << std::endl;
             res.set_content(bestMove, "text/plain");
         } catch (const std::exception& e) {
