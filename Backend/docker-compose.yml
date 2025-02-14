@@ -1,0 +1,10 @@
+services:
+  perchfish:
+    build: .
+    environment:
+      DJANGO_SECRET_KEY: "your-secret-key"
+      DEBUG: "True"
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app

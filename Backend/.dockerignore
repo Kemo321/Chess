@@ -1,0 +1,20 @@
+# Exclude virtual environment directory
+venv/
+ENV/
+env/
+.venv/
+
+# Exclude Python cache and compiled files
+__pycache__/
+*.py[cod]
+
+# Exclude Git files
+.git
+.gitignore
+
+.env
+
+.vscode/
+.idea/
+
+db.sqlite3

@@ -29,8 +29,8 @@ WORKDIR /app/build
 # Configure & build
 RUN cmake -DCMAKE_BUILD_TYPE=Release .. && make -j$(nproc)
 
-# Expose the HTTP server port
-EXPOSE 8080
+# Expose the new HTTP server port
+EXPOSE 9090
 
 # Run the chess server
 CMD ["./PerchFishMain"]

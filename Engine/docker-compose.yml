@@ -4,7 +4,7 @@ services:
     environment:
       DB_PATH: /app/database/chess.db  # Path to the SQLite database
     ports:
-      - "8080:8080"
+      - "9090:8080"  # Mapping external port 9091 to internal port 8080 for backend
     volumes:
       - sqlite-data:/app/database  # Volume for SQLite persistence
 
