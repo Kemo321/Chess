@@ -32,16 +32,15 @@ int ChessMove::getPromotion() const
     return promotion;
 }
 
-void ChessMove::setFrom(int from)
+void ChessMove::setFrom(std::pair<int, int> from)
 {
-    this->from = {from / 8, from % 8};
+    this->from = from;
 }
 
-void ChessMove::setTo(int to)
+void ChessMove::setTo(std::pair<int, int> to)
 {
-    this->to = {to / 8, to % 8};
+    this->to = to;
 }
-
 
 void ChessMove::setPromotion(int promotion)
 {
@@ -56,4 +55,14 @@ bool ChessMove::operator==(const ChessMove& other) const
 bool ChessMove::operator!=(const ChessMove& other) const
 {
     return !(*this == other);
+}
+
+void ChessMove::printMove() const
+{
+    std::cout << from.first << from.second << " -> " << to.first << to.second << "\n";
+}
+
+std::string ChessMove::toString() const
+{
+    return std::to_string(from.first) + std::to_string(from.second) + std::to_string(to.first) + std::to_string(to.second);
 }

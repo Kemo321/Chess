@@ -1,5 +1,6 @@
 #pragma once
 #include <utility>
+#include <iostream>
 
 
 class ChessMove
@@ -21,10 +22,14 @@ public:
     int getPromotion() const;
 
     // Setters
-    void setFrom(int from);
-    void setTo(int to);
+    void setFrom(std::pair<int, int> from);
+    void setTo(std::pair<int, int> to);
     void setPromotion(int promotion);
 
     bool operator==(const ChessMove& other) const;
     bool operator!=(const ChessMove& other) const;
+
+    void printMove() const;
+
+    std::string toString() const;
 };

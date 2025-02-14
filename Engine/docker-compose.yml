@@ -1,0 +1,12 @@
+services:
+  perchfish:
+    build: .
+    environment:
+      DB_PATH: /app/database/chess.db  # Path to the SQLite database
+    ports:
+      - "8080:8080"
+    volumes:
+      - sqlite-data:/app/database  # Volume for SQLite persistence
+
+volumes:
+  sqlite-data:
