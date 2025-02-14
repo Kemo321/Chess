@@ -26,7 +26,6 @@ jobs:
         run: |
           mkdir -p build
           cd build
-          # Adjust the source directory if your CMakeLists.txt is not in the repository root.
           cmake -DCMAKE_BUILD_TYPE=Release ../Engine
 
       - name: Build project
