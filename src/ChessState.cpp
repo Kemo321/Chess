@@ -3,7 +3,7 @@
 
 ChessState::ChessState(const std::string& stateStr)
 {
-    if (stateStr.size() != 71)
+    if (!checkIfStringIsValid(stateStr))
         throw std::invalid_argument("Invalid state string");
 
     // Fill board (first 64 characters)
@@ -12,13 +12,37 @@ ChessState::ChessState(const std::string& stateStr)
             this->state[i][j] = stateStr[i * 8 + j];
 
     // Flags stored in remaining characters
-    this->whiteToMove         = stateStr[64] == '1';
-    this->whiteKingMoved      = stateStr[65] == '1';
-    this->blackKingMoved      = stateStr[66] == '1';
-    this->whiteRookAMoved     = stateStr[67] == '1';
-    this->whiteRookBMoved     = stateStr[68] == '1';
-    this->blackRookAMoved     = stateStr[69] == '1';
-    this->blackRookBMoved     = stateStr[70] == '1';
+    this->whiteToMove = stateStr[64] == '1';
+    this->whiteKingMoved = stateStr[65] == '1';
+    this->blackKingMoved = stateStr[66] == '1';
+    this->whiteRookAMoved = stateStr[67] == '1';
+    this->whiteRookBMoved = stateStr[68] == '1';
+    this->blackRookAMoved = stateStr[69] == '1';
+    this->blackRookBMoved = stateStr[70] == '1';
+}
+
+bool ChessState::checkIfStringIsValid(const std::string& state)
+{
+    if (state.size() != 71)
+        return false;
+
+    // Check board characters
+    for (int i = 0; i < 64; i++)
+    {
+        char c = state[i];
+        if (c != '0' && c != 'P' && c != 'p' && c != 'N' && c != 'n' && c != 'B' && c != 'b' &&
+            c != 'R' && c != 'r' && c != 'Q' && c != 'q' && c != 'K' && c != 'k')
+            return false;
+    }
+
+    // Check flags
+    for (int i = 64; i < 71; i++)
+    {
+        if (state[i] != '0' && state[i] != '1')
+            return false;
+    }
+
+    return true;
 }
 
 void ChessState::makeMove(const ChessMove& move)
@@ -27,52 +51,67 @@ void ChessState::makeMove(const ChessMove& move)
     bool movingWhite = whiteToMove;
 
     std::pair<int, int> from = move.getFrom();
-    std::pair<int, int> to   = move.getTo();
-    char movedPiece   = state[from.first][from.second];
-    char capturedPiece= state[to.first][to.second];
+    std::pair<int, int> to = move.getTo();
+    char movedPiece = state[from.first][from.second];
+    char capturedPiece = state[to.first][to.second];
 
-    MoveRecord record { from, to, movedPiece, capturedPiece };
+
+    MoveRecord record{from, to, movedPiece, capturedPiece};
+
+    // Save previous flags
+    record.prevWhiteKingMoved = whiteKingMoved;
+    record.prevBlackKingMoved = blackKingMoved;
+    record.prevWhiteRookAMoved = whiteRookAMoved;
+    record.prevWhiteRookBMoved = whiteRookBMoved;
+    record.prevBlackRookAMoved = blackRookAMoved;
+    record.prevBlackRookBMoved = blackRookBMoved;
+    record.prevEnPassantSquare = enPassantSquare;
 
     // --- Standard move: update board ---
     state[to.first][to.second] = movedPiece;
     state[from.first][from.second] = '0';
 
     // --- Pawn promotion ---
-    if ((movedPiece == 'P' && to.first == 0) || (movedPiece == 'p' && to.first == 7)) {
+    if ((movedPiece == 'P' && to.first == 0) || (movedPiece == 'p' && to.first == 7))
+    {
         int promotion = move.getPromotion();
-        switch (promotion) {
-            case 0:
-                state[to.first][to.second] = (movedPiece == 'P') ? 'Q' : 'q';
-                break;
-            case 1:
-                state[to.first][to.second] = (movedPiece == 'P') ? 'R' : 'r';
-                break;
-            case 2:
-                state[to.first][to.second] = (movedPiece == 'P') ? 'N' : 'n';
-                break;
-            case 3:
-                state[to.first][to.second] = (movedPiece == 'P') ? 'B' : 'b';
-                break;
-            default:
-                break;
+        switch (promotion)
+        {
+        case 0:
+            state[to.first][to.second] = (movedPiece == 'P') ? 'Q' : 'q';
+            break;
+        case 1:
+            state[to.first][to.second] = (movedPiece == 'P') ? 'R' : 'r';
+            break;
+        case 2:
+            state[to.first][to.second] = (movedPiece == 'P') ? 'N' : 'n';
+            break;
+        case 3:
+            state[to.first][to.second] = (movedPiece == 'P') ? 'B' : 'b';
+            break;
+        default:
+            break;
         }
     }
 
     // --- Castling ---
-    if (movedPiece == 'K' || movedPiece == 'k') {
+    if (movedPiece == 'K' || movedPiece == 'k')
+    {
         // King-side castling:
-        if (from.second == 4 && to.second == 6) {
+        if (from.second == 4 && to.second == 6)
+        {
             record.isCastling = true;
-            record.rookFrom = { from.first, 7 };
-            record.rookTo   = { from.first, 5 };
+            record.rookFrom = {from.first, 7};
+            record.rookTo = {from.first, 5};
             state[from.first][5] = state[from.first][7];
             state[from.first][7] = '0';
         }
         // Queen-side castling:
-        else if (from.second == 4 && to.second == 2) {
+        else if (from.second == 4 && to.second == 2)
+        {
             record.isCastling = true;
-            record.rookFrom = { from.first, 0 };
-            record.rookTo   = { from.first, 3 };
+            record.rookFrom = {from.first, 0};
+            record.rookTo = {from.first, 3};
             state[from.first][3] = state[from.first][0];
             state[from.first][0] = '0';
         }
@@ -84,17 +123,43 @@ void ChessState::makeMove(const ChessMove& move)
     }
 
     // --- En passant ---
-    if (movedPiece == 'P' || movedPiece == 'p') {
-        if (std::abs(from.second - to.second) == 1 && capturedPiece == '0') {
+    if (movedPiece == 'P' || movedPiece == 'p')
+    {
+        if (std::abs(from.second - to.second) == 1 && capturedPiece == '0')
+        {
             // For en passant, the captured pawn lies behind the destination square.
             int captureRow = movingWhite ? to.first + 1 : to.first - 1;
-            if (isInsideBoard(captureRow, to.second)) {
+            if (isInsideBoard(captureRow, to.second) && state[captureRow][to.second] != '0')
+            {
                 record.isEnPassant = true;
-                record.enPassantCapturedPos = { captureRow, to.second };
+                record.enPassantCapturedPos = {captureRow, to.second};
                 capturedPiece = state[captureRow][to.second];
                 state[captureRow][to.second] = '0';
             }
         }
+    }
+
+    // --- Update enPassantSquare ---
+    enPassantSquare = {-1, -1}; // Reset by default
+    if ((movedPiece == 'P' && from.first == 6 && to.first == 4) || (movedPiece == 'p' && from.first == 1 && to.first == 3))
+    {
+        enPassantSquare = {to.first + (movingWhite ? 1 : -1), to.second};
+    }
+
+    // --- Update rook moved flags ---
+    if (movedPiece == 'R')
+    {
+        if (from == std::make_pair(7, 0))
+            whiteRookAMoved = true;
+        else if (from == std::make_pair(7, 7))
+            whiteRookBMoved = true;
+    }
+    else if (movedPiece == 'r')
+    {
+        if (from == std::make_pair(0, 0))
+            blackRookAMoved = true;
+        else if (from == std::make_pair(0, 7))
+            blackRookBMoved = true;
     }
 
     // --- Record the move ---
@@ -102,8 +167,6 @@ void ChessState::makeMove(const ChessMove& move)
 
     // --- Switch turn ---
     whiteToMove = !whiteToMove;
-
-    // --- Update game state flags (check, checkmate, stalemate) ---
 }
 
 // =====================================================
@@ -122,29 +185,38 @@ void ChessState::unmakeMove(const ChessMove& move)
     state[record.to.first][record.to.second] = record.capturedPiece;
 
     // Undo pawn promotion if necessary:
-    // (Assumes that if promotion happened, record.movedPiece is still the king's original pawn symbol.)
-    if ((record.movedPiece == 'P' && record.to.first == 0) || (record.movedPiece == 'p' && record.to.first == 7)) {
+    if ((record.movedPiece == 'P' && record.to.first == 0) || (record.movedPiece == 'p' && record.to.first == 7))
+    {
         state[record.from.first][record.from.second] = record.movedPiece;
     }
 
     // Revert castling:
-    if (record.isCastling) {
+    if (record.isCastling)
+    {
         // Move rook back:
         state[record.rookFrom.first][record.rookFrom.second] = state[record.rookTo.first][record.rookTo.second];
         state[record.rookTo.first][record.rookTo.second] = '0';
     }
 
     // Revert en passant:
-    if (record.isEnPassant) {
+    if (record.isEnPassant)
+    {
         // Restore the captured pawn to its proper square.
         auto pos = record.enPassantCapturedPos;
         state[pos.first][pos.second] = (record.movedPiece == 'P') ? 'p' : 'P';
     }
 
+    // Restore previous flags
+    whiteKingMoved = record.prevWhiteKingMoved;
+    blackKingMoved = record.prevBlackKingMoved;
+    whiteRookAMoved = record.prevWhiteRookAMoved;
+    whiteRookBMoved = record.prevWhiteRookBMoved;
+    blackRookAMoved = record.prevBlackRookAMoved;
+    blackRookBMoved = record.prevBlackRookBMoved;
+    enPassantSquare = record.prevEnPassantSquare;
+
     // Switch turn back.
     whiteToMove = !whiteToMove;
-
-    // (Optionally, update castling flags here if you store history for them.)
 }
 
 bool ChessState::isSquareAttacked(int row, int col, bool attackedByWhite) const
@@ -247,6 +319,13 @@ bool ChessState::isOwnPiece(char piece) const
 bool ChessState::isTerminal()
 {
     return isCheckmate() || isStalemate();
+}
+
+bool ChessState::isInCheck(bool byWhite) const
+{
+    int kingRow = byWhite ? getWhiteKingRow() : getBlackKingRow();
+    int kingCol = byWhite ? getWhiteKingCol() : getBlackKingCol();
+    return isSquareAttacked(kingRow, kingCol, !byWhite);
 }
 
 std::vector<ChessMove> ChessState::getLegalMoves()
@@ -390,31 +469,24 @@ int ChessState::getBlackKingCol() const
 
 bool ChessState::isCheckmate()
 {
-    int col = whiteToMove ? getWhiteKingCol() : getBlackKingCol();
-    int row = whiteToMove ? getWhiteKingRow() : getBlackKingRow();
-
-    bool check = isSquareAttacked(row, col, !whiteToMove);
-
-    if (!check) return false;
-
+    int kingRow = whiteToMove ? getWhiteKingRow() : getBlackKingRow();
+    int kingCol = whiteToMove ? getWhiteKingCol() : getBlackKingCol();
+    bool inCheck = isSquareAttacked(kingRow, kingCol, !whiteToMove);
+    if (!inCheck)
+        return false;
     std::vector<ChessMove> legalMoves = getLegalMoves();
-
     return legalMoves.empty();
-    return 0;
 }
 
 bool ChessState::isStalemate()
 {
-    int col = whiteToMove ? getWhiteKingCol() : getBlackKingCol();
-    int row = whiteToMove ? getWhiteKingRow() : getBlackKingRow();
-
-    bool check = isSquareAttacked(row, col, !whiteToMove);
-
-    if (check) return false;
-
+    int kingRow = whiteToMove ? getWhiteKingRow() : getBlackKingRow();
+    int kingCol = whiteToMove ? getWhiteKingCol() : getBlackKingCol();
+    bool inCheck = isSquareAttacked(kingRow, kingCol, !whiteToMove);
+    if (inCheck)
+        return false;
     std::vector<ChessMove> legalMoves = getLegalMoves();
     return legalMoves.empty();
-    return 0;
 }
 
 
@@ -454,63 +526,73 @@ void ChessState::printBoard() const
 
 void ChessState::getPawnMoves(int row, int col, std::vector<ChessMove>& legalMoves)
 {
+    int direction = whiteToMove ? -1 : 1;
+    int startRow = whiteToMove ? 6 : 1;
+
     // Move forward
-    if (isInsideBoard(row + (whiteToMove ? -1 : 1), col) && state[row + (whiteToMove ? -1 : 1)][col] == '0') 
+    if (isInsideBoard(row + direction, col) && state[row + direction][col] == '0')
     {
         // Promotion
-        if(isLegalMove(ChessMove(row, col, row + (whiteToMove ? -1 : 1), col, 0)) && (row + (whiteToMove ? -1 : 1) == 0 || row + (whiteToMove ? -1 : 1) == 7))
+        if (row + direction == 0 || row + direction == 7)
         {
             for (int i = 0; i < 4; i++) // 0: Queen, 1: Rook, 2: Knight, 3: Bishop
             {
-                if(isLegalMove(ChessMove(row, col, row + (whiteToMove ? -1 : 1), col, i)))
-                    legalMoves.push_back(ChessMove(row, col, row + (whiteToMove ? -1 : 1), col, i));
+                ChessMove move(row, col, row + direction, col, i);
+                if (isLegalMove(move))
+                    legalMoves.push_back(move);
             }
         }
         else
         {
-            if (isLegalMove(ChessMove(row, col, row + (whiteToMove ? -1 : 1), col, 0)))
-                legalMoves.push_back(ChessMove(row, col, row + (whiteToMove ? -1 : 1), col, 0));
+            ChessMove move(row, col, row + direction, col, 0);
+            if (isLegalMove(move))
+                legalMoves.push_back(move);
         }
     }
 
-
-    // First move
-    if (((whiteToMove && row == 6) || (!whiteToMove && row == 1)) && state[row + (whiteToMove ? -1 : 1)][col] == '0' && state[row + 2 * (whiteToMove ? -1 : 1)][col] == '0') 
+    // First move: double step
+    if (row == startRow && state[row + direction][col] == '0' && state[row + 2 * direction][col] == '0')
     {
-        if (isLegalMove(ChessMove(row, col, row + (whiteToMove ? -2 : 2), col, 0)))
-            legalMoves.push_back(ChessMove(row, col, row + (whiteToMove ? -2 : 2), col, 0));
+        ChessMove move(row, col, row + 2 * direction, col, 0);
+        if (isLegalMove(move))
+            legalMoves.push_back(move);
     }
 
     // Capture
-    for (int i = -1; i <= 1; i += 2) 
+    for (int i = -1; i <= 1; i += 2)
     {
-        if (isInsideBoard(row + (whiteToMove ? -1 : 1), col + i) && isOpponentPiece(state[row + (whiteToMove ? -1 : 1)][col + i])) 
+        if (isInsideBoard(row + direction, col + i) && isOpponentPiece(state[row + direction][col + i]))
         {
-            if (isLegalMove(ChessMove(row, col, row + (whiteToMove ? -1 : 1), col + i, 0)))
-                legalMoves.push_back(ChessMove(row, col, row + (whiteToMove ? -1 : 1), col + i, 0));
-        }
-    }
-
-    // En passant
-    if ((whiteToMove && row == 3) || (!whiteToMove && row == 4)) 
-    {
-        // Check if last move was a double pawn push
-        if (!moveHistory.empty()) 
-        {
-            MoveRecord lastMove = moveHistory.back();
-            if (whiteToMove && lastMove.movedPiece == 'p' && lastMove.from.first == 6 && lastMove.to.first == 4 && abs(lastMove.to.second - col) == 1) 
+            // Promotion
+            if (row + direction == 0 || row + direction == 7)
             {
-                if(isLegalMove(ChessMove(row, col, row - 1, lastMove.to.second, 0)))
-                    legalMoves.push_back(ChessMove(row, col, row - 1, lastMove.to.second, 0));
-            } 
-            else if (!whiteToMove && lastMove.movedPiece == 'P' && lastMove.from.first == 1 && lastMove.to.first == 3 && abs(lastMove.to.second - col) == 1) 
+                for (int p = 0; p < 4; p++)
+                {
+                    ChessMove move(row, col, row + direction, col + i, p);
+                    if (isLegalMove(move))
+                        legalMoves.push_back(move);
+                }
+            }
+            else
             {
-                if(isLegalMove(ChessMove(row, col, row + 1, lastMove.to.second, 0)))
-                    legalMoves.push_back(ChessMove(row, col, row + 1, lastMove.to.second, 0));
+                ChessMove move(row, col, row + direction, col + i, 0);
+                if (isLegalMove(move))
+                    legalMoves.push_back(move);
             }
         }
     }
 
+    // En passant
+    if (enPassantSquare.first != -1 && enPassantSquare.second != -1)
+    {
+        if (row == (whiteToMove ? 3 : 4) && std::abs(col - enPassantSquare.second) == 1 &&
+            enPassantSquare.first == row)
+        {
+            ChessMove move(row, col, row + direction, enPassantSquare.second, 0);
+            if (isLegalMove(move))
+                legalMoves.push_back(move);
+        }
+    }
 }
 
 void ChessState::getKnightMoves(int row, int col, std::vector<ChessMove>& legalMoves)
@@ -595,40 +677,68 @@ void ChessState::getQueenMoves(int row, int col, std::vector<ChessMove>& legalMo
     }
 }
 
-void ChessState::getKingMoves(int row, int col, std::vector<ChessMove>& legalMoves) 
+void ChessState::getKingMoves(int row, int col, std::vector<ChessMove>& legalMoves)
 {
-    for (int i = -1; i <= 1; i++) 
+    // Standard king moves
+    for (int i = -1; i <= 1; i++)
     {
-        for (int j = -1; j <= 1; j++) 
+        for (int j = -1; j <= 1; j++)
         {
-            if (i != 0 || j != 0) 
+            if (i != 0 || j != 0)
             {
-                if (isInsideBoard(row + i, col + j) && !isOwnPiece(state[row + i][col + j])) 
+                int r = row + i, c = col + j;
+                if (isInsideBoard(r, c) && !isOwnPiece(state[r][c]))
                 {
-                    if (isLegalMove(ChessMove(row, col, row + i, col + j, 0)))
-                        legalMoves.push_back(ChessMove(row, col, row + i, col + j, 0));
+                    ChessMove move(row, col, r, c, 0);
+                    if (isLegalMove(move))
+                        legalMoves.push_back(move);
                 }
             }
         }
     }
 
     // Castling
-    if ((whiteToMove && !whiteKingMoved) || (!whiteToMove && !blackKingMoved)) 
+    if (whiteToMove)
     {
-        if (state[row][col + 1] == '0' && state[row][col + 2] == '0') 
+        if (!whiteKingMoved)
         {
-            if (!isSquareAttacked(row, col, whiteToMove) && !isSquareAttacked(row, col + 1, whiteToMove) && !isSquareAttacked(row, col + 2, whiteToMove)) 
+            // King-side
+            if (!whiteRookBMoved && state[7][5] == '0' && state[7][6] == '0' && state[7][7] == 'R' &&
+                !isSquareAttacked(7, 4, false) && !isSquareAttacked(7, 5, false) && !isSquareAttacked(7, 6, false))
             {
-                if (isLegalMove(ChessMove(row, col, row, col + 2, 0)))
-                    legalMoves.push_back(ChessMove(row, col, row, col + 2, 0));
+                ChessMove move(7, 4, 7, 6, 0);
+                if (isLegalMove(move))
+                    legalMoves.push_back(move);
+            }
+            // Queen-side
+            if (!whiteRookAMoved && state[7][1] == '0' && state[7][2] == '0' && state[7][3] == '0' && state[7][0] == 'R' &&
+                !isSquareAttacked(7, 4, false) && !isSquareAttacked(7, 3, false) && !isSquareAttacked(7, 2, false))
+            {
+                ChessMove move(7, 4, 7, 2, 0);
+                if (isLegalMove(move))
+                    legalMoves.push_back(move);
             }
         }
-        if (state[row][col - 1] == '0' && state[row][col - 2] == '0' && state[row][col - 3] == '0') 
+    }
+    else
+    {
+        if (!blackKingMoved)
         {
-            if (!isSquareAttacked(row, col, whiteToMove) && !isSquareAttacked(row, col - 1, whiteToMove) && !isSquareAttacked(row, col - 2, whiteToMove)) 
+            // King-side
+            if (!blackRookBMoved && state[0][5] == '0' && state[0][6] == '0' && state[0][7] == 'r' &&
+                !isSquareAttacked(0, 4, true) && !isSquareAttacked(0, 5, true) && !isSquareAttacked(0, 6, true))
             {
-                if (isLegalMove(ChessMove(row, col, row, col - 2, 0)))
-                    legalMoves.push_back(ChessMove(row, col, row, col - 2, 0));
+                ChessMove move(0, 4, 0, 6, 0);
+                if (isLegalMove(move))
+                    legalMoves.push_back(move);
+            }
+            // Queen-side
+            if (!blackRookAMoved && state[0][1] == '0' && state[0][2] == '0' && state[0][3] == '0' && state[0][0] == 'r' &&
+                !isSquareAttacked(0, 4, true) && !isSquareAttacked(0, 3, true) && !isSquareAttacked(0, 2, true))
+            {
+                ChessMove move(0, 4, 0, 2, 0);
+                if (isLegalMove(move))
+                    legalMoves.push_back(move);
             }
         }
     }
