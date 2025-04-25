@@ -1,6 +1,5 @@
 #include <gtest/gtest.h>
 #include "ChessState.hpp"
-#include "ChessMove.hpp"
 
 class TestChessState : public ChessState {
 public:
@@ -135,4 +134,68 @@ TEST_F(ChessStateTestFixture, isInCheckMate){
 
     EXPECT_TRUE(state.isTerminal());
     EXPECT_TRUE(state.getLegalMoves().empty());
+}
+
+TEST_F(ChessStateTestFixture, PawnDoubleMove) {
+    ChessMove move(6, 0, 4, 0, 0); // a2 to a4
+    chessState.makeMove(move);
+    EXPECT_EQ(chessState.getPieceAt(4, 0), 'P');
+    EXPECT_EQ(chessState.getPieceAt(6, 0), '0');
+    chessState.unmakeMove(move);
+    EXPECT_EQ(chessState.getPieceAt(6, 0), 'P');
+    EXPECT_EQ(chessState.getPieceAt(4, 0), '0');
+}
+
+TEST_F(ChessStateTestFixture, CastlingRightsLost) {
+    ChessMove kingMove(7, 4, 7, 5, 0); // Move king
+    chessState.makeMove(kingMove);
+    EXPECT_TRUE(chessState.whiteKingMoved);
+    chessState.unmakeMove(kingMove);
+    EXPECT_FALSE(chessState.whiteKingMoved);
+}
+
+TEST_F(ChessStateTestFixture, Stalemate) {
+    std::string stalemateState = "00000000k00000000000000000000000000000000000000000000000K00000001000000";
+    TestChessState state(stalemateState);
+    EXPECT_FALSE(state.isInCheck(true));
+    EXPECT_FALSE(state.isTerminal());
+    EXPECT_FALSE(state.getLegalMoves().empty());
+}
+
+TEST_F(ChessStateTestFixture, PromotionToDifferentPieces) {
+    std::string promotionState = "00000000P00000000000000000000000000000000000000000000000000000001000000";
+    TestChessState state(promotionState);
+    ChessMove rookPromotion(1, 0, 0, 0, 1); // Promote to Rook
+    state.makeMove(rookPromotion);
+    EXPECT_EQ(state.getPieceAt(0, 0), 'R');
+    state.unmakeMove(rookPromotion);
+    EXPECT_EQ(state.getPieceAt(1, 0), 'P');
+}
+
+TEST_F(ChessStateTestFixture, LegalMovesInCheck) {
+    std::string checkState = "rnbqkbnrpppppppp0000000000000000000000000000q000PPPPPPPPRNBQKBNR1000000";
+    TestChessState state(checkState);
+    std::vector<ChessMove> legalMoves = state.getLegalMoves();
+    EXPECT_FALSE(legalMoves.empty());
+}
+
+TEST_F(ChessStateTestFixture, UnmakeMoveAfterCastling) {
+    ChessMove castlingMove(7, 4, 7, 6, 0); // King-side castling
+    chessState.makeMove(castlingMove);
+    chessState.unmakeMove(castlingMove);
+    EXPECT_EQ(chessState.getPieceAt(7, 4), 'K');
+    EXPECT_EQ(chessState.getPieceAt(7, 7), 'R');
+    EXPECT_EQ(chessState.getPieceAt(7, 6), 'N');
+}
+
+TEST_F(ChessStateTestFixture, MultipleMovesAndUnmakes) {
+    ChessMove move1(6, 4, 4, 4, 0); // e2 to e4
+    ChessMove move2(1, 4, 3, 4, 0); // e7 to e5
+    chessState.makeMove(move1);
+    chessState.makeMove(move2);
+    chessState.unmakeMove(move2);
+    chessState.unmakeMove(move1);
+    EXPECT_EQ(chessState.getPieceAt(6, 4), 'P');
+    EXPECT_EQ(chessState.getPieceAt(1, 4), 'p');
+    EXPECT_EQ(chessState.getPieceAt(4, 4), '0');
 }
