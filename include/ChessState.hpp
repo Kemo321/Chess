@@ -43,18 +43,24 @@ public:
     bool whiteKingMoved{}, blackKingMoved{};
     bool whiteRookAMoved{}, whiteRookBMoved{};
     bool blackRookAMoved{}, blackRookBMoved{};
+    std::pair<int, int> enPassantSquare{-1, -1};
 
     // Move history
-    struct MoveRecord {
-    std::pair<int, int> from, to;
-    char movedPiece, capturedPiece;
-    // Extra data for castling:
-    bool isCastling = false;
-    std::pair<int,int> rookFrom, rookTo;
-    // Extra data for en passant:
-    bool isEnPassant = false;
-    std::pair<int,int> enPassantCapturedPos;
-};
+    struct MoveRecord 
+    {
+        std::pair<int, int> from, to;
+        char movedPiece, capturedPiece;
+        // Extra data for castling:
+        bool isCastling = false;
+        std::pair<int,int> rookFrom, rookTo;
+        // Extra data for en passant:
+        bool isEnPassant = false;
+        std::pair<int,int> enPassantCapturedPos;
+        bool prevWhiteKingMoved, prevBlackKingMoved;
+        bool prevWhiteRookAMoved, prevWhiteRookBMoved;
+        bool prevBlackRookAMoved, prevBlackRookBMoved;
+        std::pair<int, int> prevEnPassantSquare;
+    };
     std::vector<MoveRecord> moveHistory;
 
     // Pieces moves
