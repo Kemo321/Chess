@@ -23,12 +23,16 @@ Engine::~Engine()
 std::string Engine::getBestMove(const std::string& stateStr, int depth)
 {
     // Retrieve the cached position from the database.
-    //Position position = positionORM.getPosition(stateStr);
-    //if (!position.fen.empty() && position.fen == stateStr && !position.best_move.empty())
-    //{
-     //   std::cout << "Found position in database: " << position.best_move << std::endl;
-     //   return position.best_move;
-    //}
+    Position position = positionORM.getPosition(stateStr);
+    if (!position.fen.empty() && position.fen == stateStr && !position.best_move.empty())
+    {
+        std::cout << "Found position in database: " << position.best_move << std::endl;
+        return position.best_move;
+    }
+    else
+    {
+        std::cout << "Position not found in database." << std::endl;
+    }
     
     // If not found, compute the best move.
     ChessState state(stateStr);
@@ -45,7 +49,6 @@ std::string Engine::getBestMove(const std::string& stateStr, int depth)
         return "";
     }
     
-    return computedMove;
 
     // Cache the computed result into the database.
     bool insertSuccess = positionORM.insertPosition({ stateStr, computedMove, bestScore });

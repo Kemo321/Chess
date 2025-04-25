@@ -107,7 +107,7 @@
 ## Usage & Testing
 
 - **HTTP API**:  
-  Send a POST request to `http://localhost:8080/getBestMove` with a valid 71-character chess state string in the body. The engine will return the computed best move.
+  Send a POST request to `http://localhost:9090/getBestMove` with a valid 71-character chess state string in the body. The engine will return the computed best move.
 
 - **Command-Line**:  
   Run the standalone executable (built as `PerchFishMain`) to start the HTTP server or perform command-line operations.
