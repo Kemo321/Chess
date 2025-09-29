@@ -116,9 +116,3 @@
   Tests are implemented using GoogleTest. Run the `PerchFishTest` target to execute the unit tests.
 
 ---
-
-## Conclusion
-
-PerchFish is a high-performance, modular chess engine that integrates advanced search algorithms with a simple caching layer via SQLite. Its HTTP API makes it easy to integrate into larger systems or expose chess analysis as a web service. Enjoy exploring and extending its capabilities!
-
----
